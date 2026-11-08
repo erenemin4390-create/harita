@@ -28,11 +28,13 @@
     const educationCount = document.getElementById('sourceEducationCount');
     const educationList = document.getElementById('sourceEducationList');
     const educationDetails = document.getElementById('sourceEducationDetails');
+    let panelOverride = null;
     document.getElementById('allPrisonTotal').textContent = fmt(dataset.meta.prisonCount);
     document.getElementById('allDsTotal').textContent = fmt(dataset.meta.supervisionCount);
     document.getElementById('allEducationTotal').textContent = fmt(dataset.meta.educationCount);
 
     const getCurrentProvince = () => {
+      if (panelOverride && byNorm.has(panelOverride)) return byNorm.get(panelOverride);
       const provinceLabel = (provinceText?.textContent || '').trim();
       if (provinceLabel && byNorm.has(norm(provinceLabel))) return byNorm.get(norm(provinceLabel));
       const selected = select?.value;
@@ -75,8 +77,9 @@
         const selected = button.dataset.mapProvince;
         if (search) { search.value = ''; search.dispatchEvent(new Event('input', {bubbles:true})); }
         select.value = selected;
+        panelOverride = norm(selected);
         select.dispatchEvent(new Event('change', {bubbles:true}));
-        renderProvincePanel(getCurrentProvince());
+        renderProvincePanel(byNorm.get(panelOverride));
         document.querySelector('.layout')?.scrollIntoView({behavior:'smooth',block:'start'});
       });
     };
@@ -84,8 +87,18 @@
     const observer = new MutationObserver(updateFromAppState);
     if (provinceText) observer.observe(provinceText, {childList:true,characterData:true,subtree:true});
     if (districtText) observer.observe(districtText, {childList:true,characterData:true,subtree:true});
-    select?.addEventListener('change', updateFromAppState);
-    search?.addEventListener('input', () => setTimeout(updateFromAppState, 140));
+    document.getElementById('map')?.addEventListener('pointermove', () => {
+      if (panelOverride) {
+        panelOverride = null;
+        updateFromAppState();
+      }
+    }, {passive:true});
+    select?.addEventListener('change', () => {
+      panelOverride = select.value ? norm(select.value) : null;
+      if (panelOverride) renderProvincePanel(byNorm.get(panelOverride));
+      else updateFromAppState();
+    });
+    search?.addEventListener('input', () => { panelOverride = null; setTimeout(updateFromAppState, 140); });
     updateFromAppState();
   }).catch((error) => {
     console.error(error);

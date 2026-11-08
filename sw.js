@@ -1,5 +1,5 @@
-const CACHE_NAME = 'cte-harita-v4';
-const APP_SHELL = ['./', './index.html', './manifest.json', './sw.js', './province-data-ui.js?v=5', './data/cezaevi-il-veri.json?v=5', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png'];
+const CACHE_NAME = 'cte-harita-v6';
+const APP_SHELL = ['./', './index.html', './manifest.json', './sw.js', './province-data-ui.js?v=7', './data/cezaevi-il-veri.json?v=5', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
